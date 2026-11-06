@@ -1,4 +1,4 @@
-// kwtsms-alertmanager receives Prometheus Alertmanager webhooks and sends each alert group as one SMS through kwtSMS.
+// kwtsms-prometheus receives Prometheus Alertmanager webhooks and sends each alert group as one SMS through kwtSMS.
 //
 // Settings come from the environment; see README.md.
 package main
@@ -293,13 +293,14 @@ func main() {
 	cfg := LoadConfig()
 	client, err := kwtsms.New(cfg.Username, cfg.Password,
 		kwtsms.WithSenderID(cfg.Sender), kwtsms.WithTestMode(cfg.TestMode), kwtsms.WithLogFile(""),
-		kwtsms.WithAppName("kwtsms-alertmanager/"+version),
+		// 2026-11-06 20:20 +03: renamed from kwtsms-alertmanager (Boss: the name people search for is Prometheus).
+		kwtsms.WithAppName("kwtsms-prometheus/"+version),
 		kwtsms.WithHTTPClient(&http.Client{Timeout: 8 * time.Second}))
 	if err != nil {
 		log.Fatal(err)
 	}
 	s := &Server{cfg: cfg, client: client, now: time.Now, seen: map[string]time.Time{}}
-	log.Printf("kwtsms-alertmanager %s listening on %s (test mode %v)", version, cfg.ListenAddr, cfg.TestMode)
+	log.Printf("kwtsms-prometheus %s listening on %s (test mode %v)", version, cfg.ListenAddr, cfg.TestMode)
 	srv := &http.Server{Addr: cfg.ListenAddr, Handler: s, ReadHeaderTimeout: 10 * time.Second}
 	log.Fatal(srv.ListenAndServe())
 }

@@ -1,4 +1,4 @@
-module github.com/kwtsms/kwtsms-alertmanager
+module github.com/kwtsms/kwtsms-prometheus
 
 go 1.22
 

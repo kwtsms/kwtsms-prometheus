@@ -1,7 +1,15 @@
-# kwtSMS for Prometheus Alertmanager
+# kwtSMS for Prometheus
 
 Send Prometheus alerts by SMS through [kwtSMS](https://www.kwtsms.com), the SMS gateway for Kuwait and the Gulf.
-`kwtsms-alertmanager` is a small webhook receiver: Alertmanager posts each alert group to it, and it sends one SMS.
+
+Prometheus does not send notifications itself: its alerts go to **Alertmanager**, which groups them and passes them on
+to receivers (e-mail, chat, webhooks). `kwtsms-prometheus` is a small service that Alertmanager calls as a webhook
+receiver; it turns each alert group into one SMS. You add one receiver to your Alertmanager configuration, nothing in
+Prometheus itself changes.
+
+```
+Prometheus  --alerts-->  Alertmanager  --webhook-->  kwtsms-prometheus  --SMS-->  kwtSMS  -->  phones
+```
 
 ## Features
 
@@ -24,15 +32,15 @@ Send Prometheus alerts by SMS through [kwtSMS](https://www.kwtsms.com), the SMS 
 Docker:
 
 ```sh
-docker run -d --name kwtsms-alertmanager -p 9097:9097 \
+docker run -d --name kwtsms-prometheus -p 9097:9097 \
   -e KWTSMS_USERNAME=your_api_username \
   -e KWTSMS_PASSWORD_FILE=/run/secrets/kwtsms_password \
   -e AUTH_TOKEN_FILE=/run/secrets/kwtsms_token \
   -v /etc/kwtsms:/run/secrets:ro \
-  ghcr.io/kwtsms/kwtsms-alertmanager:1
+  ghcr.io/kwtsms/kwtsms-prometheus:1
 ```
 
-Or build the binary: `go build -o kwtsms-alertmanager .` and run it with the same environment variables.
+Or build the binary: `go build -o kwtsms-prometheus .` and run it with the same environment variables.
 
 ## Configure Alertmanager
 
@@ -46,7 +54,7 @@ route:
 receivers:
   - name: oncall-sms
     webhook_configs:
-      - url: http://kwtsms-alertmanager:9097/alert?to=965XXXXXXXX,965XXXXXXXX
+      - url: http://kwtsms-prometheus:9097/alert?to=965XXXXXXXX,965XXXXXXXX
         max_alerts: 5
         http_config:
           authorization:

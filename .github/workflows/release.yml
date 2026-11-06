@@ -1,4 +1,4 @@
-# 2026-11-06 20:16 +03: publish the Docker image the README points to (ghcr.io/kwtsms/kwtsms-alertmanager) on a
+# 2026-11-06 20:16 +03: publish the Docker image the README points to (ghcr.io/kwtsms/kwtsms-prometheus) on a
 # version tag, after the tests pass. Uses the workflow's own token (packages: write), no stored secret.
 name: Release
 
@@ -32,7 +32,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/kwtsms/kwtsms-alertmanager
+          images: ghcr.io/kwtsms/kwtsms-prometheus
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -47,6 +47,6 @@ jobs:
       - name: GitHub release
         run: |
           gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" \
-            --notes "Docker image ghcr.io/kwtsms/kwtsms-alertmanager:${GITHUB_REF_NAME#v}. See CHANGELOG.md."
+            --notes "Docker image ghcr.io/kwtsms/kwtsms-prometheus:${GITHUB_REF_NAME#v}. See CHANGELOG.md."
         env:
           GH_TOKEN: ${{ github.token }}
