@@ -71,7 +71,7 @@ The file `kwtsms-token` holds the same value as `AUTH_TOKEN`.
 | `KWTSMS_PASSWORD` / `KWTSMS_PASSWORD_FILE` | required | kwtSMS API password; prefer the file |
 | `AUTH_TOKEN` / `AUTH_TOKEN_FILE` | required | Bearer token Alertmanager must send, 16 characters or more |
 | `KWTSMS_SENDER` | `KWT-SMS` | Sender ID shown on the phone |
-| `KWTSMS_TEST_MODE` | `0` | `1` = queued on kwtSMS, not delivered, no credits used |
+| `KWTSMS_TEST_MODE` | `0` | `1` = queued on kwtSMS, not delivered; credits held until you delete the message from the Sending Queue |
 | `MAX_PAGES` | `2` | Longest SMS, in pages |
 | `MAX_NUMBERS` | `10` | Most numbers in one `to=` |
 | `MAX_SMS_PER_MINUTE` | `30` | Hard cap; extra notifications get HTTP 429 |
