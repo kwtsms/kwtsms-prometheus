@@ -15,7 +15,7 @@ Send Prometheus alerts by SMS through [kwtSMS](https://www.kwtsms.com), the SMS 
 
 ## Requirements
 
-- Alertmanager (any current version; webhook payload version 4).
+- Alertmanager (webhook payload version 4; tested with the current prom/alertmanager image, 2026-11-06).
 - Outbound HTTPS to `www.kwtsms.com`.
 - A kwtSMS account with API access. [Sign up free](https://www.kwtsms.com/signup/).
 
@@ -70,6 +70,9 @@ The file `kwtsms-token` holds the same value as `AUTH_TOKEN`.
 | `LISTEN_ADDR` | `:9097` | Listen address |
 
 `GET /healthz` answers `ok` for liveness checks.
+
+Docker Compose `env_file`: a `$` in a value is read as a variable. If your API password contains `$`, write it as `$$`,
+or use `KWTSMS_PASSWORD_FILE`, which is read as it is.
 
 ## Keep alert storms under control
 
