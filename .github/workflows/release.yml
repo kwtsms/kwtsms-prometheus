@@ -1,0 +1,52 @@
+# 2026-11-06 20:16 +03: publish the Docker image the README points to (ghcr.io/kwtsms/kwtsms-alertmanager) on a
+# version tag, after the tests pass. Uses the workflow's own token (packages: write), no stored secret.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26"
+      - name: Version in main.go must equal the tag
+        run: |
+          v=$(grep -oE '^const version = "[^"]+"' main.go | cut -d'"' -f2)
+          [ "v$v" = "${GITHUB_REF_NAME}" ] || { echo "::error::main.go version ($v) does not match tag ${GITHUB_REF_NAME}"; exit 1; }
+      - run: go vet ./... && go test -count=1 ./...
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/kwtsms/kwtsms-alertmanager
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: GitHub release
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" \
+            --notes "Docker image ghcr.io/kwtsms/kwtsms-alertmanager:${GITHUB_REF_NAME#v}. See CHANGELOG.md."
+        env:
+          GH_TOKEN: ${{ github.token }}
