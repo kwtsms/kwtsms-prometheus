@@ -1,0 +1,8 @@
+kwtsms-alertmanager
+.claude/
+CLAUDE.md
+docs/
+.env*
+*.log
+napkin.md
+.remember/
