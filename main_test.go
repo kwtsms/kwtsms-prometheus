@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -194,5 +195,29 @@ func TestHealthz(t *testing.T) {
 	s.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/healthz", nil))
 	if w.Code != 200 {
 		t.Fatal(w.Code)
+	}
+}
+
+// 2026-11-16 21:56 +03: Grafana contact point "Webhook" posts an Alertmanager-shaped body (version "1", plus title,
+// state, message, orgId). A group without a common alertname lists each alert by name. int-grafana.
+func TestGrafanaWebhookPayload(t *testing.T) {
+	grafana := `{"receiver":"kwtsms","status":"firing","orgId":1,"version":"1","groupKey":"{}:{}","truncatedAlerts":0,
+"title":"[FIRING:2] (blue)","state":"alerting","message":"**Firing**",
+"groupLabels":{},"commonLabels":{"team":"blue"},"commonAnnotations":{},"externalURL":"https://grafana.example/",
+"alerts":[
+ {"status":"firing","labels":{"alertname":"High memory usage","team":"blue"},"annotations":{"summary":"Memory over 90% on web01"},"fingerprint":"a1","startsAt":"2026-11-16T18:00:00Z","values":{"B":91.2}},
+ {"status":"firing","labels":{"alertname":"High CPU usage","team":"blue"},"annotations":{},"fingerprint":"b2","startsAt":"2026-11-16T18:00:00Z"}]}`
+	var p Payload
+	if err := json.Unmarshal([]byte(grafana), &p); err != nil {
+		t.Fatal(err)
+	}
+	want := "[FIRING:2]\nHigh memory usage: Memory over 90% on web01\nHigh CPU usage"
+	if got := BuildMessage(p, 2); got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+	s, f, _ := newServer(nil)
+	rec := post(s, "/alert?to=99912345678", "Bearer "+token, grafana)
+	if rec.Code != http.StatusOK || len(f.msgs) != 1 || f.msgs[0] != want {
+		t.Fatalf("code %d msgs %q", rec.Code, f.msgs)
 	}
 }

@@ -1,6 +1,6 @@
 # kwtSMS for Prometheus
 
-Send Prometheus alerts by SMS through [kwtSMS](https://www.kwtsms.com), the SMS gateway for Kuwait and the Gulf.
+Send Prometheus and Grafana alerts by SMS through [kwtSMS](https://www.kwtsms.com), the SMS gateway for Kuwait and the Gulf.
 
 Prometheus does not send notifications itself: its alerts go to **Alertmanager**, which groups them and passes them on
 to receivers (e-mail, chat, webhooks). `kwtsms-prometheus` is a small service that Alertmanager calls as a webhook
@@ -62,6 +62,21 @@ receivers:
 ```
 
 The file `kwtsms-token` holds the same value as `AUTH_TOKEN`.
+
+## Grafana alerts
+
+Grafana Alerting can use the same service, with no extra software:
+
+1. In Grafana open **Alerting, Contact points, + Add contact point**.
+2. Name it (for example `oncall-sms`) and choose the integration **Webhook**.
+3. URL: `http://kwtsms-prometheus:9097/alert?to=965XXXXXXXX,965XXXXXXXX` (the address Grafana can reach).
+4. In the optional settings keep **Authentication Header Scheme** `Bearer` and put your `AUTH_TOKEN` value in
+   **Authentication Header Credentials**.
+5. Click **Test**, then **Save contact point**, and select it in a notification policy or an alert rule.
+
+When the alerts in one notification have different names, the SMS lists each alert by name with its summary.
+
+Grafana's settings: [Configure webhook notifications](https://grafana.com/docs/grafana/latest/alerting/configure-notifications/manage-contact-points/integrations/webhook-notifier/).
 
 ## Settings
 

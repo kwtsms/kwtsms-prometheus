@@ -136,6 +136,12 @@ func BuildMessage(p Payload, maxPages int) string {
 	} else {
 		for _, a := range p.Alerts {
 			s := firstNonEmpty(a.Annotations["summary"], a.Annotations["description"], a.Labels["instance"])
+			// 2026-11-16 21:56 +03: a group without a common alertname (Grafana groups by folder or labels, and
+			// Alertmanager with group_by other than alertname) names each alert, else the SMS does not say what fired. int-grafana.
+			if p.CommonLabels["alertname"] == "" && a.Labels["alertname"] != "" {
+				s = strings.TrimSpace(a.Labels["alertname"] + ": " + s)
+				s = strings.TrimSuffix(s, ":")
+			}
 			if s != "" {
 				lines = append(lines, s)
 			}
