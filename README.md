@@ -2,6 +2,8 @@
 
 Send Prometheus and Grafana alerts by SMS through [kwtSMS](https://www.kwtsms.com), the SMS gateway for Kuwait and the Gulf.
 
+All kwtSMS integrations: [kwtsms.com/integrations](https://www.kwtsms.com/integrations/)
+
 Prometheus does not send notifications itself: its alerts go to **Alertmanager**, which groups them and passes them on
 to receivers (e-mail, chat, webhooks). `kwtsms-prometheus` is a small service that Alertmanager calls as a webhook
 receiver; it turns each alert group into one SMS. You add one receiver to your Alertmanager configuration, nothing in
